@@ -12,17 +12,14 @@ for y, row in enumerate(grid):
         if freq != ".":
             antennas[freq].add(x + y * 1j)
 
-def antinodes(resonant_harmonics):
+def antinodes(harmonics):
     for freq, positions in antennas.items():
         for (pos1, pos2) in permutations(positions, 2):
-            if resonant_harmonics:
-                yield pos1
-            antinode = pos1 + pos1 - pos2
-            while 0 <= antinode.real < width and 0 <= antinode.imag < height:
-                yield antinode
-                if not resonant_harmonics:
+            for h in harmonics:
+                antinode = pos1 + h * (pos1 - pos2)
+                if not (0 <= antinode.real < width and 0 <= antinode.imag < height):
                     break
-                antinode += pos1 - pos2
+                yield antinode
 
-print(len(set(antinodes(False))))
-print(len(set(antinodes(True))))
+print(len(set(antinodes([1]))))
+print(len(set(antinodes(range(max(width, height))))))
