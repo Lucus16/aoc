@@ -1,5 +1,3 @@
-from collections import Counter
-
 width, height = 101, 103
 
 class Robot:
@@ -20,14 +18,11 @@ q3 = sum(1 for x, y in positions if x < width // 2 and y > height // 2)
 q4 = sum(1 for x, y in positions if x > width // 2 and y > height // 2)
 print(q1 * q2 * q3 * q4)
 
-expected = Counter({y: round(len(positions) / height) for y in range(height)})
 def rate(positions):
-    # Score is number of unique positions that are more than expected on each row.
-    return (Counter(y for x, y in set(positions)) - expected).total()
+    # Score is number of positions with horizontal neighbors
+    return sum(1 for x, y in positions if (x - 1, y) in positions)
 
-pictures = [(rate(robot.locate(dt) for robot in robots), dt) for dt in range(width * height)]
-pictures.sort(reverse=True)
-rating, dt = pictures[0]
+rating, dt = max((rate({robot.locate(dt) for robot in robots}), dt) for dt in range(width * height))
 positions = {robot.locate(dt) for robot in robots}
 for y in range(height):
     print("".join("*" if (x, y) in positions else " " for x in range(width)))
