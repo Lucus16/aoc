@@ -1,42 +1,31 @@
-with open("day9.in", "r") as f:
-    disk_map = [(i & 1 != 0, i // 2, int(size)) for i, size in enumerate(f.read().strip())]
+from itertools import accumulate
 
-total_size = sum(size for empty, i, size in disk_map if not empty)
-movable = (i for empty, i, size in reversed(disk_map) if not empty for _ in range(size))
-blocks = (next(movable) if empty else i for empty, i, size in disk_map for _ in range(size))
-print(sum(pos * i for pos, i in zip(range(total_size), blocks)))
-
-from dataclasses import dataclass
-
-@dataclass
 class Chunk:
-    position: int
-    size: int
+    def __init__(self, position, size):
+        self.position = position
+        self.size = size
 
-    def range(self):
-        return range(self.position, self.position + self.size)
-
-def get_chunks(sizes):
-    position = 0
-    for size in sizes:
-        yield Chunk(position, size)
-        position += size
+    def __iter__(self):
+        return iter(range(self.position, self.position + self.size))
 
 with open("day9.in", "r") as f:
-    chunks = list(get_chunks(int(size) for size in f.read().strip()))
+    sizes = [int(size) for size in f.read().strip()]
+    chunks = [Chunk(pos, size) for pos, size in zip(accumulate(sizes, initial=0), sizes)]
     files = chunks[::2]
     spaces = chunks[1::2]
+
+empty_blocks = (pos for space in spaces for pos in space)
+file_blocks = [(pos, i) for i, file in enumerate(files) for pos in file]
+print(sum(min(pos, next(empty_blocks, pos)) * i for pos, i in reversed(file_blocks)))
 
 def get_spaces(size):
     for space in spaces:
         while space.size >= size:
-            position = space.position
             space.size -= size
             space.position += size
-            yield position
+            yield space.position - size
 
-allocators = {size: get_spaces(size) for size in range(1, 10)}
+allocators = [get_spaces(size) for size in range(10)]
 for file in reversed(files):
     file.position = min(file.position, next(allocators[file.size], file.position))
-
-print(sum(pos * file_id for file_id, file in enumerate(files) for pos in file.range()))
+print(sum(pos * file_id for file_id, file in enumerate(files) for pos in file))
