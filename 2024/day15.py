@@ -8,7 +8,6 @@ class Grid:
         self.grid = {x + 1j * y: cell for y, row in enumerate(rows) for x, cell in enumerate(row)}
         self.robot = next(pos for pos, cell in self.grid.items() if cell == "@")
         self.grid[self.robot] = " "
-        self.boxcount = sum(1 for cell in self.grid.values() if cell in "[O")
 
     def move(self, move):
         pushed = set()
@@ -26,21 +25,10 @@ class Grid:
         self.grid.update(override)
         self.robot += move
 
-    def render(self):
-        height = round(max(pos.imag for pos in self.grid)) + 1
-        width = round(max(pos.real for pos in self.grid)) + 1
-        for y in range(height):
-            print("".join("@" if self.robot == x + 1j * y else self.grid[x + 1j * y] for x in range(width)))
-
-    def gps(self):
-        return round(sum(100 * pos.imag + pos.real for pos, cell in self.grid.items() if cell in "[O"))
-
 tilemap = {"#": "##", "O": "[]", ".": "  ", "@": "@ "}
-grids = [
-    Grid([row.replace(".", " ") for row in rows]),
-    Grid(["".join(tilemap[cell] for cell in row) for row in rows]),
-]
-for grid in grids:
+grid1 = Grid([row.replace(".", " ") for row in rows])
+grid2 = Grid(["".join(tilemap[cell] for cell in row) for row in rows])
+for grid in [grid1, grid2]:
     for move in moves:
         grid.move(move)
-    print(grid.gps())
+    print(round(sum(100 * pos.imag + pos.real for pos, cell in grid.grid.items() if cell in "[O")))
