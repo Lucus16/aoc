@@ -29,10 +29,22 @@ with open("day18.in", "r") as f:
     lines = [line.split(",") for line in f]
     corruptions = [int(x) + int(y) * 1j for x, y in lines]
 
-positions = {x + y * 1j for x in range(71) for y in range(71)}
-positions -= set(corruptions[:1024])
-edges = {pos: {pos + step: 1 for step in [1, 1j, -1, -1j]} for pos in positions}
-dist, prev = shortestpaths(edges, [0j])
-print(dist[70 + 70j])
+def steps(corruption_count):
+    positions = {x + y * 1j for x in range(71) for y in range(71)}
+    positions -= set(corruptions[:corruption_count])
+    edges = {pos: {pos + step: 1 for step in [1, 1j, -1, -1j]} for pos in positions}
+    dist, prev = shortestpaths(edges, [0j])
+    return dist.get(70 + 70j)
 
-# TODO: Binary search for part two
+print(steps(1024))
+
+good, bad = 1024, len(corruptions)
+while good + 1 < bad:
+    test = (good + bad) // 2
+    d = steps(test)
+    if d:
+        good = test
+    else:
+        bad = test
+pos = corruptions[good]
+print(round(pos.real), round(pos.imag), sep=",")
