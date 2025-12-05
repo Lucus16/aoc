@@ -5,7 +5,7 @@ close $handle
 set position 50
 set zero_end_count 0
 set zero_click_count 0
-lmap rotation $input {
+foreach rotation $input {
         set direction [string index $rotation 0]
         set amount [string range $rotation 1 end]
         if {$direction == "R"} then {
