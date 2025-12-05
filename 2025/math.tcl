@@ -15,3 +15,13 @@ proc min xs {
         }
         return $result
 }
+
+proc max xs {
+        set result ""
+        foreach x $xs {
+                if {[string length $result] == 0 || $x > $result} {
+                        set result $x
+                }
+        }
+        return $result
+}
